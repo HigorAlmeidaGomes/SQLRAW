@@ -30,6 +30,25 @@ public class AlunosController : Controller
 
     public async Task<IActionResult> AlunosCursos(string cidade)
     {
-        return View();
+        var alunos = _appDbContext.Database.SqlQuery<AlunoCurso>($@"SELECT
+                                                            Alunos.AlunoId,
+                                                            Alunos.Nome AS NomeAluno,
+                                                            Alunos.Cidade AS CidadeAluno,
+                                                            Alunos.DataMatricula AS DataMatriculaAluno,
+                                                            Alunos.Ativo AS AlunoAtivo,
+                                                            Curso.Id AS CursoId,
+                                                            Curso.Nome AS NomeCurso,
+                                                            Curso.Inicio AS InicioCurso
+                                                        FROM
+                                                            Alunos
+                                                        INNER JOIN
+                                                            Curso ON Alunos.CursoId = Curso.Id
+                                                        WHERE (Alunos.Cidade = {cidade} OR {cidade} = '') 
+                                                                                                   OR ({cidade} IS NULL)
+                                                        ORDER BY Alunos.Nome");
+
+        var resultado = await alunos.ToListAsync();
+
+        return View(resultado);
     }
 }
